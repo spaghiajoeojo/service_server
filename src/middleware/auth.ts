@@ -1,9 +1,12 @@
-const jwt = require("jsonwebtoken");
-const config = require("config");
+import * as jwt from "jsonwebtoken";
+import * as config from "config";
+import { ISessionUser } from "../interfaces/custom";
+import { Request, Response } from "express";
 
-module.exports = function (req, res, next) {
+export function auth(req: Request, res: Response, next: Function) {
     //get the token from the header if present
-    const token = req.headers["x-access-token"] || req.headers["authorization"];
+    //const token: string = req.headers["x-access-token"] || req.headers["authorization"];
+    const token: string = req.rawHeaders["x-access-token"] || req.rawHeaders["authorization"];
     //if no token found, return response (without going to the next middelware)
     if (!token && res) {
         return res.status(401).send("Access denied. No token provided.");
@@ -11,7 +14,7 @@ module.exports = function (req, res, next) {
 
     try {
         //if can verify the token, set req.user and pass to next middleware
-        const decoded = jwt.verify(token, config.get("token_salt"));
+        const decoded: ISessionUser = <ISessionUser>jwt.verify(token, config.get("token_salt"));
         if (decoded.expiration < new Date().getTime() && decoded.expiration != -1) {
             throw new Error("Invalid token");
         }

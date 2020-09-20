@@ -1,10 +1,17 @@
-const config = require('config');
-const jwt = require('jsonwebtoken');
-const Joi = require('joi');
-const mongoose = require('mongoose');
+import * as config from 'config';
+import * as jwt from 'jsonwebtoken';
+import * as Joi from 'joi';
+import * as mongoose from 'mongoose';
+import { Schema, Document } from 'mongoose';
 
-//simple schema
-const UserSchema = new mongoose.Schema({
+export interface IUser extends Document {
+    name: string;
+    email: string;
+    password: string;
+    generateAuthToken: Function;
+}
+
+const UserSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -32,23 +39,19 @@ UserSchema.methods.generateAuthToken = function () {
     const day = 30;
     const token = jwt.sign({
         _id: this._id,
-        expiration: config.get("lifetime_token") != -1 ? (new Date().getTime() + (config.get("lifetime_token")*1000)) : -1
+        expiration: config.get('lifetime_token') != -1 ? (new Date().getTime() + (config.get<number>('lifetime_token') * 1000)) : -1
     }, config.get('token_salt')); //get the private key from the config file -> environment variable
     return token;
 }
 
-const User = mongoose.model('User', UserSchema);
-
+export default mongoose.model<IUser>('User', UserSchema);
 //function to validate user 
-function validateUser(user) {
-    const schema = {
+export function validate(user) {
+    const schema = Joi.object({
         name: Joi.string().min(3).max(50).required(),
         email: Joi.string().min(5).max(255).required().email(),
         password: Joi.string().min(3).max(255).required()
-    };
+    });
 
-    return Joi.validate(user, schema);
+    return schema.validate(user);
 }
-
-exports.User = User;
-exports.validate = validateUser;
