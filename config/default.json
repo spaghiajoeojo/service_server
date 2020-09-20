@@ -1,5 +1,6 @@
 {
     "token_salt": "mytoken",
     "lifetime_token": -1,
-    "mongodb_url": "mongodb://mongo/server_data"
+    "mongodb_url": "mongodb://mongo/server_data",
+    "ws_enabled": false
 }

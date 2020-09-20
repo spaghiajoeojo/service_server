@@ -1,4 +1,4 @@
-FROM node
+FROM node:alpine
 
 WORKDIR /usr/src/app
 
@@ -8,5 +8,7 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
-CMD [ "npm", "start" ]
+RUN npx tsc
+
+EXPOSE 5000
+CMD [ "npm", "run", "serve" ]
